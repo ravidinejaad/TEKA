@@ -46,7 +46,8 @@ export function AuthProvider({ children }) {
       storage.set(STORAGE_KEYS.USER, userData);
       setToken(token);
       setUser(userData);
-      return res.data;
+      // Return userData dengan role untuk redirect logic
+      return userData;
     }
     throw new Error(res?.message || 'Login gagal');
   };

@@ -117,6 +117,9 @@ export const quizAPI = {
 export const categoryAPI = {
   getAll: (params) => API.get('/categories', { params }),
   getById: (id) => API.get(`/categories/${id}`),
+  create: (data) => API.post('/categories', data),
+  update: (id, data) => API.put(`/categories/${id}`, data),
+  delete: (id) => API.delete(`/categories/${id}`),
 };
 
 // Classes
@@ -148,12 +151,35 @@ export const notificationAPI = {
 
 // Admin
 export const adminAPI = {
+  // Dashboard & Analytics
   getAnalytics: () => API.get('/admin/analytics'),
   getDashboard: () => API.get('/admin/dashboard'),
   getTeacherRankings: (params) => API.get('/admin/teachers/rankings', { params }),
   getStudentActivity: (params) => API.get('/admin/students/activity', { params }),
   getHealth: () => API.get('/admin/health'),
-  getAllUsers: (params) => API.get('/users/all', { params }),
-  updateUserStatus: (id, status_aktif) => API.put(`/users/${id}/status`, { status_aktif }),
+  
+  // User Management
+  getAllUsers: (params) => API.get('/admin/users', { params }),
+  getUserById: (id) => API.get(`/admin/users/${id}`),
+  createUser: (data) => API.post('/admin/users', data),
+  updateUser: (id, data) => API.put(`/admin/users/${id}`, data),
+  deleteUser: (id) => API.delete(`/admin/users/${id}`),
+  updateUserStatus: (id, status_aktif) => API.put(`/admin/users/${id}/status`, { status_aktif }),
+  updateUserRole: (id, role) => API.put(`/admin/users/${id}/role`, { role }),
+  
+  // Category Management
+  getAllCategories: (params) => API.get('/admin/categories', { params }),
+  getCategoryById: (id) => API.get(`/admin/categories/${id}`),
+  createCategory: (data) => API.post('/admin/categories', data),
+  updateCategory: (id, data) => API.put(`/admin/categories/${id}`, data),
+  deleteCategory: (id) => API.delete(`/admin/categories/${id}`),
+  
+  // Quiz Management
+  getAllQuizzes: (params) => API.get('/admin/quizzes', { params }),
+  deleteQuiz: (id) => API.delete(`/admin/quizzes/${id}`),
+  
+  // Stats
+  getStats: () => API.get('/admin/stats'),
+  getRecentActivity: (params) => API.get('/admin/activity', { params }),
 };
 

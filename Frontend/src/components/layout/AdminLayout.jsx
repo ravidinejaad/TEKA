@@ -29,7 +29,7 @@ export default function AdminLayout() {
 
   const menuItems = [
     { path: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard', badge: null },
-    { path: '/admin/users', icon: Users, label: 'Kelola Pengguna', badge: '234' },
+    { path: '/admin/users', icon: Users, label: 'Kelola Pengguna', badge: null },
     { path: '/admin/categories', icon: FolderTree, label: 'Kategori', badge: null },
     { path: '/admin/quizzes', icon: BookOpen, label: 'Semua Kuis', badge: null },
     { path: '/admin/analytics', icon: BarChart3, label: 'Analitik', badge: null },

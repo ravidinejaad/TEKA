@@ -30,6 +30,9 @@ import ProfilePage from './pages/dashboard/ProfilePage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
 import AdminCategoriesPage from './pages/admin/AdminCategoriesPage';
+import AdminQuizzesPage from './pages/admin/AdminQuizzesPage';
+import AdminAnalyticsPage from './pages/admin/AdminAnalyticsPage';
+import AdminSettingsPage from './pages/admin/AdminSettingsPage';
 
 // Teacher Pages (placeholder - will be created)
 import TeacherDashboard from './pages/teacher/TeacherDashboard';
@@ -113,6 +116,9 @@ export default function App() {
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="users" element={<AdminUsersPage />} />
               <Route path="categories" element={<AdminCategoriesPage />} />
+              <Route path="quizzes" element={<AdminQuizzesPage />} />
+              <Route path="analytics" element={<AdminAnalyticsPage />} />
+              <Route path="settings" element={<AdminSettingsPage />} />
             </Route>
 
             {/* Teacher Dashboard Routes */}
