@@ -1,0 +1,45 @@
+/* Parallax container */
+.landing-page {
+  overflow-x: hidden;
+}
+
+/* Hero section parallax effect */
+.hero-section {
+  position: relative;
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* Smooth parallax transition */
+.hero-section > div {
+  will-change: transform;
+  transition: transform 0.2s cubic-bezier(0.33, 0.66, 0.66, 1);
+}
+
+/* Floating animation for shapes */
+@keyframes floatAnimation {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.float-slow {
+  animation: floatAnimation 6s ease-in-out infinite;
+}
+
+/* Performance optimization - disable parallax on mobile */
+@media (max-width: 768px) {
+  .hero-section {
+    background-attachment: scroll;
+  }
+  
+  [style*="translateY"] {
+    transform: none !important;
+  }
+}
+
