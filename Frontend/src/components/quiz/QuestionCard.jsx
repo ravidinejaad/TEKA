@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import classNames from 'classnames';
 import { Flag, CheckCircle2 } from 'lucide-react';
 
@@ -13,7 +13,28 @@ export default function QuestionCard({
 }) {
   if (!question) return null;
 
-  const options = question.options || [];
+  // Deduplicate options by label and text to guarantee no duplicate options are ever displayed
+  const options = useMemo(() => {
+    let raw = question.options;
+
+    // Fallback for True/False questions if options not provided
+    if ((!raw || raw.length === 0) && question.jenis_soal === 'benar_salah') {
+      raw = [
+        { id_opsi: 1, label_opsi: 'A', teks_opsi: 'Benar', urutan: 1 },
+        { id_opsi: 2, label_opsi: 'B', teks_opsi: 'Salah', urutan: 2 },
+      ];
+    }
+
+    if (!Array.isArray(raw)) return [];
+
+    const seen = new Set();
+    return raw.filter((opt) => {
+      const key = `${String(opt.label_opsi).trim().toUpperCase()}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [question.options, question.jenis_soal]);
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 animate-fade-in">
@@ -62,7 +83,12 @@ export default function QuestionCard({
       {/* Answer Options */}
       <div className="space-y-3">
         {options.map((opt) => {
-          const isSelected = selectedAnswer === opt.label_opsi;
+          const isSelected =
+            selectedAnswer !== undefined &&
+            selectedAnswer !== null &&
+            (String(selectedAnswer).trim().toLowerCase() === String(opt.label_opsi).trim().toLowerCase() ||
+              String(selectedAnswer).trim().toLowerCase() === String(opt.teks_opsi).trim().toLowerCase());
+
           return (
             <button
               key={opt.id_opsi || opt.label_opsi}
@@ -104,7 +130,7 @@ export default function QuestionCard({
         })}
 
         {/* If question is essay / short text */}
-        {options.length === 0 && question.jenis_soal !== 'pilihan_ganda' && (
+        {options.length === 0 && question.jenis_soal !== 'pilihan_ganda' && question.jenis_soal !== 'benar_salah' && (
           <div className="pt-2">
             <textarea
               rows={4}

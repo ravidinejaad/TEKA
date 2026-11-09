@@ -604,3 +604,67 @@ export async function closeQuiz(req, res) {
     });
   }
 }
+
+
+// Get quiz questions (for quiz attempt)
+export async function getQuizQuestions(req, res) {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id_user;
+
+    // Get quiz with questions
+    const quiz = await getQuizWithQuestions(id);
+
+    if (!quiz) {
+      return res.status(404).json({
+        success: false,
+        message: 'Quiz tidak ditemukan'
+      });
+    }
+
+    // Check if user has access (either student in class or teacher who owns the class)
+    const [accessCheck] = await query(
+      `SELECT 1 FROM class_members 
+       WHERE id_kelas = ? AND id_user = ?
+       UNION
+       SELECT 1 FROM classes 
+       WHERE id_kelas = ? AND id_pengajar = ?
+       LIMIT 1`,
+      [quiz.id_kelas, userId, quiz.id_kelas, userId]
+    );
+
+    if (!accessCheck) {
+      return res.status(403).json({
+        success: false,
+        message: 'Anda tidak memiliki akses ke quiz ini'
+      });
+    }
+
+    // Return questions without correct answers
+    const questions = quiz.questions.map(q => ({
+      id_soal: q.id_soal,
+      pertanyaan: q.pertanyaan,
+      jenis_soal: q.jenis_soal,
+      bobot: q.bobot,
+      urutan: q.urutan,
+      options: q.options.map(opt => ({
+        id_opsi: opt.id_opsi,
+        label_opsi: opt.label_opsi,
+        teks_opsi: opt.teks_opsi,
+        urutan: opt.urutan
+      }))
+    }));
+
+    res.json({
+      success: true,
+      data: questions
+    });
+  } catch (error) {
+    console.error('Error in getQuizQuestions:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Terjadi kesalahan server',
+      error: error.message
+    });
+  }
+}

@@ -46,13 +46,12 @@ export default function LoginPage() {
       toast.success('Login berhasil! Selamat datang kembali.');
       
       // Role-based redirect
-      if (userData.role === 'admin') {
-        navigate('/admin/dashboard', { replace: true });
-      } else if (userData.role === 'teacher') {
-        navigate('/teacher/dashboard', { replace: true });
+      if (userData?.role === 'admin') {
+        navigate('/admin', { replace: true });
       } else {
-        // student role
-        navigate('/dashboard', { replace: true });
+        // teacher or student → dashboard
+        const destination = from && from !== '/login' ? from : '/dashboard';
+        navigate(destination, { replace: true });
       }
     } catch (err) {
       toast.error(err.message || 'Login gagal. Periksa kembali email dan password Anda.');

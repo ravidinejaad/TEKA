@@ -117,14 +117,20 @@ export async function startQuizAttempt(req, res) {
       [id_kuis]
     );
 
-    // Get options for multiple choice questions
+    // Get options for multiple choice and true/false questions
     const questionsWithOptions = await Promise.all(
       questions.map(async (q) => {
-        if (q.jenis_soal === 'pilihan_ganda') {
-          const options = await query(
+        if (q.jenis_soal === 'pilihan_ganda' || q.jenis_soal === 'benar_salah') {
+          let options = await query(
             'SELECT id_opsi, label_opsi, teks_opsi FROM question_options WHERE id_soal = ? ORDER BY urutan',
             [q.id_soal]
           );
+          if ((!options || options.length === 0) && q.jenis_soal === 'benar_salah') {
+            options = [
+              { id_opsi: 1, label_opsi: 'A', teks_opsi: 'Benar', urutan: 1 },
+              { id_opsi: 2, label_opsi: 'B', teks_opsi: 'Salah', urutan: 2 }
+            ];
+          }
           return { ...q, options };
         }
         return { ...q, options: [] };
@@ -207,11 +213,17 @@ export async function getCurrentAttempt(req, res) {
     const questionsWithData = await Promise.all(
       questions.map(async (q) => {
         let options = [];
-        if (q.jenis_soal === 'pilihan_ganda') {
+        if (q.jenis_soal === 'pilihan_ganda' || q.jenis_soal === 'benar_salah') {
           options = await query(
             'SELECT id_opsi, label_opsi, teks_opsi FROM question_options WHERE id_soal = ? ORDER BY urutan',
             [q.id_soal]
           );
+          if ((!options || options.length === 0) && q.jenis_soal === 'benar_salah') {
+            options = [
+              { id_opsi: 1, label_opsi: 'A', teks_opsi: 'Benar', urutan: 1 },
+              { id_opsi: 2, label_opsi: 'B', teks_opsi: 'Salah', urutan: 2 }
+            ];
+          }
         }
 
         const studentAnswer = await queryOne(
@@ -418,10 +430,17 @@ async function gradeQuiz(attemptId) {
       let poin = 0;
 
       if (studentAnswer) {
+        // Fetch options for accurate grading by label or text
+        const options = await query(
+          'SELECT id_opsi, label_opsi, teks_opsi FROM question_options WHERE id_soal = ?',
+          [question.id_soal]
+        );
+
         isCorrect = gradeAnswer(
           studentAnswer.jawaban,
           question.kunci_jawaban,
-          question.jenis_soal
+          question.jenis_soal,
+          options || []
         );
 
         if (isCorrect) {
@@ -451,20 +470,60 @@ async function gradeQuiz(attemptId) {
 }
 
 // Grade individual answer
-function gradeAnswer(studentAnswer, correctAnswer, questionType) {
-  switch (questionType) {
-    case 'pilihan_ganda':
-      return studentAnswer === correctAnswer;
-
-    case 'benar_salah':
-      return normalizeString(studentAnswer) === normalizeString(correctAnswer);
-
-    case 'isian_singkat':
-      return compareAnswers(studentAnswer, correctAnswer);
-
-    default:
-      return false;
+function gradeAnswer(studentAnswer, correctAnswer, questionType, options = []) {
+  if (studentAnswer === undefined || studentAnswer === null || correctAnswer === undefined || correctAnswer === null) {
+    return false;
   }
+
+  const sAns = String(studentAnswer).trim().toLowerCase();
+  const cAns = String(correctAnswer).trim().toLowerCase();
+
+  // Direct match
+  if (sAns === cAns) return true;
+
+  // Flexible match for choices and true/false
+  if (options && options.length > 0) {
+    // 1. studentAnswer might be label ('A', 'B'), correctAnswer might be text ('42', 'Jakarta')
+    const optByStudentLabel = options.find(
+      (o) => String(o.label_opsi).trim().toLowerCase() === sAns
+    );
+    if (optByStudentLabel && String(optByStudentLabel.teks_opsi).trim().toLowerCase() === cAns) {
+      return true;
+    }
+
+    // 2. studentAnswer might be text ('42'), correctAnswer might be label ('B')
+    const optByCorrectLabel = options.find(
+      (o) => String(o.label_opsi).trim().toLowerCase() === cAns
+    );
+    if (optByCorrectLabel && String(optByCorrectLabel.teks_opsi).trim().toLowerCase() === sAns) {
+      return true;
+    }
+
+    // 3. Both might be matched via the same option
+    const studentOpt = options.find(
+      (o) =>
+        String(o.label_opsi).trim().toLowerCase() === sAns ||
+        String(o.teks_opsi).trim().toLowerCase() === sAns
+    );
+    const correctOpt = options.find(
+      (o) =>
+        String(o.label_opsi).trim().toLowerCase() === cAns ||
+        String(o.teks_opsi).trim().toLowerCase() === cAns
+    );
+    if (studentOpt && correctOpt && (studentOpt.id_opsi === correctOpt.id_opsi || studentOpt.label_opsi === correctOpt.label_opsi)) {
+      return true;
+    }
+  }
+
+  if (questionType === 'benar_salah') {
+    return normalizeString(studentAnswer) === normalizeString(correctAnswer);
+  }
+
+  if (questionType === 'isian_singkat') {
+    return compareAnswers(studentAnswer, correctAnswer);
+  }
+
+  return false;
 }
 
 // Get quiz results helper
@@ -491,14 +550,20 @@ async function getQuizResult(attemptId) {
     [attemptId]
   );
 
-  // Get options for multiple choice
+  // Get options for multiple choice and true/false
   const answersWithOptions = await Promise.all(
     answers.map(async (a) => {
-      if (a.jenis_soal === 'pilihan_ganda') {
-        const options = await query(
+      if (a.jenis_soal === 'pilihan_ganda' || a.jenis_soal === 'benar_salah') {
+        let options = await query(
           'SELECT id_opsi, label_opsi, teks_opsi FROM question_options WHERE id_soal = ? ORDER BY urutan',
           [a.id_soal]
         );
+        if ((!options || options.length === 0) && a.jenis_soal === 'benar_salah') {
+          options = [
+            { id_opsi: 1, label_opsi: 'A', teks_opsi: 'Benar', urutan: 1 },
+            { id_opsi: 2, label_opsi: 'B', teks_opsi: 'Salah', urutan: 2 }
+          ];
+        }
         return { ...a, options };
       }
       return { ...a, options: [] };

@@ -3,6 +3,7 @@ import {
   createQuiz,
   getClassQuizzes,
   getQuizDetail,
+  getQuizQuestions,
   updateQuiz,
   deleteQuiz,
   publishQuiz,
@@ -17,6 +18,7 @@ const router = express.Router();
 router.post('/', verifyToken, authorize('teacher'), quizValidation, createQuiz);
 router.get('/classes/:classId', verifyToken, paginationValidation, getClassQuizzes);
 router.get('/:id', verifyToken, idValidation, getQuizDetail);
+router.get('/:id/questions', verifyToken, idValidation, getQuizQuestions);
 router.put('/:id', verifyToken, authorize('teacher'), idValidation, quizValidation, updateQuiz);
 router.delete('/:id', verifyToken, authorize('teacher'), idValidation, deleteQuiz);
 router.post('/:id/publish', verifyToken, authorize('teacher'), idValidation, publishQuiz);

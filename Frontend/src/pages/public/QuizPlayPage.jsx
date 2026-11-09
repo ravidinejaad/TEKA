@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import Navbar from '../../components/layout/Navbar';
 import QuestionCard from '../../components/quiz/QuestionCard';
 import ProgressBar from '../../components/quiz/ProgressBar';
 import Timer from '../../components/quiz/Timer';
@@ -51,7 +50,7 @@ export default function QuizPlayPage() {
     if (!attempt || String(attempt.id_percobaan) !== String(attemptId)) {
       loadAttempt(attemptId).catch((err) => {
         toast.error('Gagal memuat sesi kuis atau sesi sudah kedaluwarsa.');
-        navigate('/quizzes');
+        navigate('/dashboard/my-quizzes');
       });
     }
   }, [attemptId]);
@@ -89,10 +88,8 @@ export default function QuizPlayPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-      <Navbar />
-
       {/* Floating Sub-Header (Progress & Timer) */}
-      <div className="sticky top-16 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 lg:px-8 py-3">
+      <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 lg:px-8 py-3">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
           <div className="flex-1 max-w-md">
             <ProgressBar

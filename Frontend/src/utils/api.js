@@ -101,6 +101,7 @@ export const quizAPI = {
   getAll: (params) => API.get('/quizzes', { params }),
   getByClass: (classId, params) => API.get(`/quizzes/classes/${classId}`, { params }),
   getById: (id) => API.get(`/quizzes/${id}`),
+  getQuestions: (quizId) => API.get(`/quizzes/${quizId}/questions`),
   create: (data) => API.post('/quizzes', data),
   update: (id, data) => API.put(`/quizzes/${id}`, data),
   publish: (id) => API.post(`/quizzes/${id}/publish`),
@@ -111,6 +112,16 @@ export const quizAPI = {
   submitAttempt: (attemptId) => API.post(`/quiz-attempts/${attemptId}/submit`),
   getAttemptResults: (attemptId) => API.get(`/quiz-attempts/${attemptId}/results`),
   getQuizHistory: (quizId) => API.get(`/quiz-attempts/quiz/${quizId}/history`),
+};
+
+// Quiz Attempts
+export const quizAttemptAPI = {
+  start: (id_kuis) => API.post('/quiz-attempts', { id_kuis }),
+  getById: (attemptId) => API.get(`/quiz-attempts/${attemptId}`),
+  submitAnswers: (attemptId, jawaban) => API.post(`/quiz-attempts/${attemptId}/answers`, { jawaban }),
+  complete: (attemptId) => API.post(`/quiz-attempts/${attemptId}/complete`),
+  getResult: (attemptId) => API.get(`/quiz-attempts/${attemptId}/result`),
+  getHistory: (params) => API.get('/quiz-attempts/history', { params }),
 };
 
 // Categories

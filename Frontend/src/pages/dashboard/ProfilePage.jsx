@@ -70,7 +70,7 @@ export default function ProfilePage() {
     setSavingPassword(true);
     try {
       await userAPI.changePassword({
-        currentPassword: passwordForm.currentPassword,
+        oldPassword: passwordForm.currentPassword,
         newPassword: passwordForm.newPassword,
       });
       toast.success('Kata sandi berhasil diubah!');

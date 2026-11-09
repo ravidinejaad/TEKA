@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   GraduationCap,
   BookOpen,
+  Compass,
   History,
   User,
   LogOut,
@@ -33,6 +34,11 @@ export default function Sidebar({ onCloseMobile }) {
       icon: BookOpen,
     },
     {
+      to: '/dashboard/quizzes',
+      label: 'Jelajahi Kuis',
+      icon: Compass,
+    },
+    {
       to: '/dashboard/history',
       label: 'Riwayat Kuis',
       icon: History,
@@ -47,7 +53,7 @@ export default function Sidebar({ onCloseMobile }) {
   return (
     <aside className="w-64 h-full bg-white border-r border-slate-200 flex flex-col justify-between p-4 select-none">
       <div className="space-y-4">
-        {/* Brand Header (Only for Dashboard, No Link to Landing Page) */}
+        {/* Brand Header */}
         <div className="flex items-center gap-2.5 px-3 py-3 border-b border-slate-100">
           <div className="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center font-extrabold text-base shadow-md shadow-purple-200 shrink-0">
             T
@@ -89,7 +95,7 @@ export default function Sidebar({ onCloseMobile }) {
                     <>
                       <Icon
                         className={`w-4 h-4 shrink-0 transition-colors ${
-                          isActive ? 'text-white' : 'text-slate-600 group-hover:text-purple-600'
+                          isActive ? 'text-white' : 'text-slate-600'
                         }`}
                       />
                       <span>{item.label}</span>
@@ -117,7 +123,7 @@ export default function Sidebar({ onCloseMobile }) {
           </div>
         </div>
 
-        {/* Logout Button: High Contrast Solid Red Background & Crisp White Text */}
+        {/* Logout Button */}
         <button
           type="button"
           onClick={logout}

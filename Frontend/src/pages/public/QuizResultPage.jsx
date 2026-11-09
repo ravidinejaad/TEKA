@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import Navbar from '../../components/layout/Navbar';
-import Footer from '../../components/layout/Footer';
+import { useParams, useNavigate } from 'react-router-dom';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import Loader from '../../components/ui/Loader';
@@ -33,14 +31,14 @@ export default function QuizResultPage() {
     [attemptId]
   );
 
-  const result = resultData?.result || resultData;
+  const result = resultData?.result || resultData?.data || resultData;
   const targetScore = Number(result?.skor ?? 0);
 
   // Animated Count Up Effect for Score
   useEffect(() => {
     if (result && targetScore > 0) {
       let start = 0;
-      const duration = 1200; // ms
+      const duration = 1200;
       const increment = targetScore / (duration / 20);
 
       const timer = setInterval(() => {
@@ -60,19 +58,13 @@ export default function QuizResultPage() {
   }, [result, targetScore]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col bg-slate-50">
-        <Navbar />
-        <Loader fullScreen text="Menghitung skor dan hasil evaluasi..." />
-      </div>
-    );
+    return <Loader fullScreen text="Menghitung skor dan hasil evaluasi..." />;
   }
 
   if (error || !result) {
     return (
-      <div className="min-h-screen flex flex-col bg-slate-50">
-        <Navbar />
-        <div className="max-w-md mx-auto py-20 px-4 text-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+        <div className="max-w-md text-center">
           <h2 className="text-2xl font-bold text-slate-800 mb-2">Hasil Tidak Ditemukan</h2>
           <p className="text-slate-500 text-sm mb-6">
             Data evaluasi kuis ini mungkin belum selesai dinilai atau Anda tidak berhak mengaksesnya.
@@ -81,12 +73,11 @@ export default function QuizResultPage() {
             Kembali ke Dashboard
           </Button>
         </div>
-        <Footer />
       </div>
     );
   }
 
-  const answers = result.answers || [];
+  const answers = result.answers || result.jawaban || [];
   const correctCount = answers.filter((a) => a.is_benar).length;
   const wrongCount = answers.length - correctCount;
 
@@ -101,13 +92,10 @@ export default function QuizResultPage() {
   const gradeInfo = getGradeInfo(targetScore);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
-      <Navbar />
-
+    <div className="min-h-screen bg-slate-50 flex flex-col">
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full space-y-8">
         {/* Score Card Hero */}
-        <div className="bg-gradient-to-br from-purple-700 via-purple-600 to-indigo-700 rounded-3xl text-white p-8 sm:p-12 text-center shadow-quiziz-lg relative overflow-hidden animate-scale-in">
-          {/* Subtle background circles */}
+        <div className="bg-gradient-to-br from-purple-700 via-purple-600 to-indigo-700 rounded-3xl text-white p-8 sm:p-12 text-center shadow-xl relative overflow-hidden">
           <div className="absolute -top-16 -left-16 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
           <div className="absolute -bottom-16 -right-16 w-64 h-64 bg-indigo-400/20 rounded-full blur-2xl pointer-events-none" />
 
@@ -167,7 +155,7 @@ export default function QuizResultPage() {
             variant="primary"
             size="lg"
             className="w-full sm:w-auto shadow-md shadow-purple-200"
-            onClick={() => navigate(`/quizzes/${result.id_kuis}`)}
+            onClick={() => navigate(`/dashboard/quizzes/${result.id_kuis}`)}
             icon={RotateCcw}
           >
             Halaman Kuis
@@ -240,7 +228,7 @@ export default function QuizResultPage() {
 
                     {/* Expandable Body */}
                     {isExpanded && (
-                      <div className="p-4 bg-slate-50/70 border-t border-slate-100 space-y-3 text-sm animate-slide-up">
+                      <div className="p-4 bg-slate-50/70 border-t border-slate-100 space-y-3 text-sm">
                         <div className="space-y-1">
                           <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                             Pertanyaan:
@@ -258,17 +246,32 @@ export default function QuizResultPage() {
                                 isCorrect ? 'text-emerald-700' : 'text-rose-600'
                               }`}
                             >
-                              {ans.jawaban || '(Kosong / Tidak dijawab)'}
+                              {(() => {
+                                if (!ans.jawaban) return '(Kosong / Tidak dijawab)';
+                                const opt = ans.options?.find(
+                                  (o) =>
+                                    String(o.label_opsi).trim().toLowerCase() === String(ans.jawaban).trim().toLowerCase() ||
+                                    String(o.teks_opsi).trim().toLowerCase() === String(ans.jawaban).trim().toLowerCase()
+                                );
+                                return opt ? `${opt.label_opsi}. ${opt.teks_opsi}` : ans.jawaban;
+                              })()}
                             </p>
                           </div>
 
                           {ans.kunci_jawaban && (
-                            <div className="p-3 bg-white rounded-xl border border-emerald-200 bg-emerald-50/30">
+                            <div className="p-3 bg-emerald-50/30 rounded-xl border border-emerald-200">
                               <p className="text-[11px] font-bold text-emerald-700 uppercase">
                                 Kunci Jawaban:
                               </p>
                               <p className="font-semibold text-emerald-900 mt-1">
-                                {ans.kunci_jawaban}
+                                {(() => {
+                                  const opt = ans.options?.find(
+                                    (o) =>
+                                      String(o.label_opsi).trim().toLowerCase() === String(ans.kunci_jawaban).trim().toLowerCase() ||
+                                      String(o.teks_opsi).trim().toLowerCase() === String(ans.kunci_jawaban).trim().toLowerCase()
+                                  );
+                                  return opt ? `${opt.label_opsi}. ${opt.teks_opsi}` : ans.kunci_jawaban;
+                                })()}
                               </p>
                             </div>
                           )}
@@ -289,9 +292,6 @@ export default function QuizResultPage() {
           </div>
         )}
       </main>
-
-      <Footer />
     </div>
   );
 }
-

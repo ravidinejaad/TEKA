@@ -44,16 +44,18 @@ export function QuizProvider({ children }) {
     setLoading(true);
     try {
       const res = await quizAPI.startAttempt(quizId);
-      if (res?.data) {
-        const attemptData = res.data;
-        setAttempt(attemptData);
-        setQuestions(attemptData.questions || []);
-        setCurrentIndex(0);
-        setAnswers({});
-        setFlagged([]);
-        storage.set(STORAGE_KEYS.QUIZ_STATE, attemptData);
-        return attemptData;
+      // Backend may return { data: {...} } or { success, data } or the object directly
+      const attemptData = res?.data || res;
+      if (!attemptData?.id_percobaan) {
+        throw new Error(res?.message || 'Gagal memulai kuis. Respons tidak valid dari server.');
       }
+      setAttempt(attemptData);
+      setQuestions(attemptData.questions || attemptData.soal || []);
+      setCurrentIndex(0);
+      setAnswers({});
+      setFlagged([]);
+      storage.set(STORAGE_KEYS.QUIZ_STATE, attemptData);
+      return attemptData;
     } finally {
       setLoading(false);
     }
@@ -63,13 +65,14 @@ export function QuizProvider({ children }) {
     setLoading(true);
     try {
       const res = await quizAPI.getAttempt(attemptId);
-      if (res?.data) {
-        const data = res.data;
-        setAttempt(data);
-        setQuestions(data.questions || []);
-        storage.set(STORAGE_KEYS.QUIZ_STATE, data);
-        return data;
+      const data = res?.data || res;
+      if (!data?.id_percobaan) {
+        throw new Error('Sesi kuis tidak valid atau sudah berakhir.');
       }
+      setAttempt(data);
+      setQuestions(data.questions || data.soal || []);
+      storage.set(STORAGE_KEYS.QUIZ_STATE, data);
+      return data;
     } finally {
       setLoading(false);
     }

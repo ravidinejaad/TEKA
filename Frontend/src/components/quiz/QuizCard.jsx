@@ -5,11 +5,15 @@ import Badge from '../ui/Badge';
 import Button from '../ui/Button';
 import { Clock, HelpCircle, GraduationCap, ArrowRight, Play } from 'lucide-react';
 
-export default function QuizCard({ quiz, onStart }) {
+export default function QuizCard({ quiz, onStart, onView }) {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
-    navigate(`/quizzes/${quiz.id_kuis}`);
+    if (onView) {
+      onView(quiz.id_kuis);
+    } else {
+      navigate(`/dashboard/quizzes/${quiz.id_kuis}`);
+    }
   };
 
   const getStatusBadge = (status) => {
@@ -72,7 +76,7 @@ export default function QuizCard({ quiz, onStart }) {
               if (onStart) {
                 onStart(quiz.id_kuis);
               } else {
-                navigate(`/quizzes/${quiz.id_kuis}`);
+                navigate(`/dashboard/quizzes/${quiz.id_kuis}`);
               }
             }}
           >
@@ -83,4 +87,3 @@ export default function QuizCard({ quiz, onStart }) {
     </Card>
   );
 }
-
